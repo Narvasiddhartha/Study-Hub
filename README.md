@@ -14,7 +14,6 @@ Study-Hub is a full-stack learning companion for computer science students. It c
 - [Installation & Setup](#installation--setup)
 - [Environment Variables](#environment-variables)
 - [Running the Apps](#running-the-apps)
-- [Screenshots](#screenshots)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -140,17 +139,6 @@ npm start
 ```
 
 The frontend expects the backend at `http://localhost:5001`. Update `frontend/src/api/axios.js` if you change the API base URL.
-
----
-
-## Screenshots
-
-![Landing Page](screenshots/screenshot-1.jpeg)
-![Dashboard Overview](screenshots/screenshot-2.jpeg)
-![Subject Resources](screenshots/screenshot-3.jpeg)
-![Quiz Module](screenshots/screenshot-4.jpeg)
-![AI Predictor](screenshots/screenshot-5.jpeg)
-![Chatbot & Notes](screenshots/screenshot-6.jpeg)
 
 ---
 

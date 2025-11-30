@@ -5,6 +5,7 @@ Study-Hub is a full-stack learning companion for computer science students. It c
 ---
 
 ## Table of Contents
+- [What's New](#whats-new)
 - [How Study-Hub Works](#how-study-hub-works)
 - [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
@@ -15,6 +16,16 @@ Study-Hub is a full-stack learning companion for computer science students. It c
 - [Running the Apps](#running-the-apps)
 - [Screenshots](#screenshots)
 - [Troubleshooting](#troubleshooting)
+
+---
+
+---
+
+## What's New
+- **Exam Simulator:** 40-question, 45-minute mock exams with history tracking, streak bonuses, and secure result storage via `/exam` APIs.
+- **Placement Hub:** Dedicated `Placement`, `SubjectExam`, and `SubjectDetail` pages surfacing job-focused resources and curated subject roadmaps.
+- **Expanded Auth UX:** Forgot/Reset password flows, richer login component, and subject-driven dashboards backed by the new `subjects.js` data layer.
+- **Progress Intelligence:** `streakUtils` powers streak history, while exam attempts now feed dashboards and recommendations.
 
 ---
 
@@ -35,10 +46,13 @@ Study-Hub is a full-stack learning companion for computer science students. It c
 - **Unified dashboard** with progress charts, quick subject cards, and reminders.
 - **Auth-protected resources** including downloads, external links, and curated study kits.
 - **Subject quizzes & analytics** storing history for future recommendations.
+- **Timed exam mode** delivering proctored-style attempts (40 Qs/45 min) with result history, streak boosts, and violation logging.
 - **AI exam readiness predictor** offering plans based on inputs, study hours, and quiz history.
 - **Smart StudyBot** using OpenRouter for contextual assistance aligned with Study-Hub’s feature set.
 - **Code editor + Judge0 runner** to test Python and Java snippets without leaving the app.
 - **Notes Studio** per subject with PDF export, versioning, and tagging.
+- **Placement prep hub** with subject deep-dives, combined exam listings, and curated prep journeys.
+- **Account recovery** covering forgot / reset password UI flows and secure token validation.
 - **Profile center** for avatar management, settings, and security actions.
 - **Responsive UI** built with React, Bootstrap, Chart.js, and face-api enhancements.
 
@@ -56,7 +70,14 @@ Study-Hub is a full-stack learning companion for computer science students. It c
 ```
 studyhubtrail-main/
 ├── backend/        # Express API, Mongo models, routes, controllers
+│   └── utils/      # Shared helpers (e.g., streak tracking)
 ├── frontend/       # React SPA
+│   ├── src/components/Exam.jsx
+│   ├── src/components/ForgotPassword.jsx
+│   ├── src/components/ResetPassword.jsx
+│   ├── src/components/SubjectDetail.jsx
+│   ├── src/data/subjects.js
+│   └── src/pages/{ExamPage, Placement, SubjectExam}.js
 └── screenshots/    # Project visuals used in README
 ```
 
@@ -99,7 +120,7 @@ JUDGE0_API_KEY=your_rapidapi_key    # optional (defaults to placeholder)
 PORT=5001
 ```
 
-> Add any additional provider keys (Cloudinary, email, etc.) if you externalize them later. Never commit `.env`.
+> Update `backend/server.js` CORS origin if you deploy frontend elsewhere. Add provider keys (Cloudinary, email, etc.) as needed. Never commit `.env`.
 
 ---
 

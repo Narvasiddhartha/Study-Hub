@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from '../api/axios';
 import { Line } from 'react-chartjs-2';
 import {
@@ -19,6 +19,7 @@ ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip,
 const Profile = () => {
   const [user, setUser] = useState({});
   const [quizHistory, setQuizHistory] = useState([]);
+  const [examHistory, setExamHistory] = useState([]);
   const [streakData, setStreakData] = useState({
     currentStreak: 0,
     longestStreak: 0,
@@ -27,9 +28,13 @@ const Profile = () => {
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentExamPage, setCurrentExamPage] = useState(1);
   const quizzesPerPage = 5;
+  const examsPerPage = 5;
   const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showExamModal, setShowExamModal] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [selectedExam, setSelectedExam] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
@@ -77,9 +82,60 @@ const Profile = () => {
     }
   };
 
+  const fetchExamHistory = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await axios.get('/exam/history/all', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Fetched exam history:', response.data);
+      const history = response.data.examHistory || [];
+      setExamHistory(history);
+      console.log('Exam history set:', history.length, 'exams');
+    } catch (error) {
+      console.error('Error fetching exam history:', error);
+      console.error('Error details:', error.response?.data);
+    }
+  };
+
   useEffect(() => {
+    // Security check - verify token exists
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+      return;
+    }
+    
     fetchUserProfile();
     fetchStreakData();
+    fetchExamHistory();
+    
+    // Refresh exam history and graph when exam is completed
+    const handleExamCompleted = () => {
+      console.log('Exam completed event received, refreshing exam history and graph...');
+      fetchExamHistory();
+      fetchUserProfile(); // This will also refresh quiz history
+      fetchStreakData();
+      setGraphUpdate(prev => prev + 1); // Update graph
+    };
+    
+    // Refresh quiz history and graph when quiz is completed
+    const handleQuizCompleted = () => {
+      console.log('Quiz completed event received, refreshing quiz history and graph...');
+      fetchUserProfile(); // This will refresh quiz history
+      fetchStreakData();
+      setGraphUpdate(prev => prev + 1); // Update graph
+    };
+    
+    window.addEventListener('examCompleted', handleExamCompleted);
+    window.addEventListener('quizCompleted', handleQuizCompleted);
+    
+    return () => {
+      window.removeEventListener('examCompleted', handleExamCompleted);
+      window.removeEventListener('quizCompleted', handleQuizCompleted);
+    };
 }, []);
 
   // Remove the useEffect that refetches on user.profileImage change
@@ -176,49 +232,283 @@ const Profile = () => {
     return advice;
   };
 
+  // Calculate exam statistics
+  const calculateExamStats = () => {
+    if (examHistory.length === 0) return null;
+    
+    const totalExams = examHistory.length;
+    const totalScore = examHistory.reduce((sum, exam) => sum + exam.score, 0);
+    const totalQuestions = examHistory.reduce((sum, exam) => sum + exam.totalQuestions, 0);
+    const averagePercentage = totalQuestions > 0 ? Math.round((totalScore / totalQuestions) * 100) : 0;
+    
+    const bestExam = examHistory.reduce((best, current) => {
+      const currentPercentage = (current.score / current.totalQuestions) * 100;
+      const bestPercentage = (best.score / best.totalQuestions) * 100;
+      return currentPercentage > bestPercentage ? current : best;
+    });
+    
+    const bestPercentage = Math.round((bestExam.score / bestExam.totalQuestions) * 100);
+    const uniqueSubjects = [...new Set(examHistory.map(exam => exam.subject))].length;
+    const totalDuration = examHistory.reduce((sum, exam) => sum + (exam.duration || 0), 0);
+    const avgDuration = Math.round(totalDuration / totalExams / 60); // in minutes
+    
+    return {
+      totalExams,
+      averagePercentage,
+      bestPercentage,
+      bestSubject: bestExam.subject,
+      uniqueSubjects,
+      totalScore,
+      totalQuestions,
+      avgDuration
+    };
+  };
+
   // Download PDF report
   const handleDownloadReport = () => {
     const stats = calculateStats();
+    const examStats = calculateExamStats();
     const doc = new jsPDF();
+    
+    // Header with gradient-like effect (using colored rectangle)
+    doc.setFillColor(99, 102, 241); // Indigo color
+    doc.rect(0, 0, 210, 35, 'F');
+    
+    // Title
+    doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text('StudyHub User Report', 14, 18);
+    doc.setFontSize(24);
+    doc.text('StudyHub User Report', 105, 20, { align: 'center' });
+    
+    // Subtitle
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Name: ${user.name || ''}`, 14, 30);
-    doc.text(`Email: ${user.email || ''}`, 14, 38);
-    doc.text(`Joined: ${user.joined ? formatDate(user.joined) : ''}`, 14, 46);
-    doc.text(`Quizzes Completed: ${quizHistory.length}`, 14, 54);
-    if (stats) {
-      doc.text(`Average Score: ${stats.averagePercentage}%`, 14, 62);
-      doc.text(`Best Score: ${stats.bestPercentage}%`, 14, 70);
-      doc.text(`Subjects Attempted: ${stats.uniqueSubjects}`, 14, 78);
-      doc.text(`Total Correct: ${stats.totalScore}/${stats.totalQuestions}`, 14, 86);
-      doc.text(`Best Subject: ${stats.bestSubject}`, 14, 94);
-    }
+    doc.text('Comprehensive Performance Analysis', 105, 28, { align: 'center' });
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
+    let yPos = 45;
+    
+    // User Information Section
+    doc.setFillColor(240, 245, 255); // Light indigo background
+    doc.rect(10, yPos, 190, 30, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.text('ML Performance Summary:', 14, 110);
+    doc.setFontSize(14);
+    doc.text('User Information', 14, yPos + 8);
     doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    yPos += 12;
+    
+    // Wrap long text to fit in boxes
+    const nameText = doc.splitTextToSize(`Name: ${user.name || 'N/A'}`, 85);
+    const emailText = doc.splitTextToSize(`Email: ${user.email || 'N/A'}`, 85);
+    doc.text(nameText, 14, yPos);
+    doc.text(emailText, 110, yPos);
+    yPos += Math.max(nameText.length, emailText.length) * 5;
+    
+    const joinedText = doc.splitTextToSize(`Joined: ${user.joined ? formatDate(user.joined) : 'N/A'}`, 85);
+    const streakText = doc.splitTextToSize(`Current Streak: ${streakData.currentStreak} days`, 85);
+    doc.text(joinedText, 14, yPos);
+    doc.text(streakText, 110, yPos);
+    yPos += Math.max(joinedText.length, streakText.length) * 5 + 5;
+    
+    // Quiz Statistics Section
+    if (stats) {
+      doc.setFillColor(236, 253, 245); // Light green background
+      doc.rect(10, yPos, 92, 40, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('Quiz Statistics', 14, yPos + 8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      let quizY = yPos + 12;
+      doc.text(`Quizzes: ${quizHistory.length}`, 14, quizY);
+      quizY += 5;
+      doc.text(`Avg Score: ${stats.averagePercentage}%`, 14, quizY);
+      quizY += 5;
+      doc.text(`Best: ${stats.bestPercentage}%`, 14, quizY);
+      quizY += 5;
+      doc.text(`Subjects: ${stats.uniqueSubjects}`, 14, quizY);
+      quizY += 5;
+      doc.text(`Total: ${stats.totalScore}/${stats.totalQuestions}`, 14, quizY);
+    }
+    
+    // Exam Statistics Section
+    if (examStats) {
+      doc.setFillColor(254, 242, 242); // Light red background
+      doc.rect(108, yPos, 92, 40, 'F');
+    doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('Exam Statistics', 112, yPos + 8);
+    doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      let examY = yPos + 12;
+      doc.text(`Exams: ${examHistory.length}`, 112, examY);
+      examY += 5;
+      doc.text(`Avg Score: ${examStats.averagePercentage}%`, 112, examY);
+      examY += 5;
+      doc.text(`Best: ${examStats.bestPercentage}%`, 112, examY);
+      examY += 5;
+      doc.text(`Subjects: ${examStats.uniqueSubjects}`, 112, examY);
+      examY += 5;
+      doc.text(`Avg: ${examStats.avgDuration} min`, 112, examY);
+    }
+    
+    yPos += 45;
+    
+    // ML Performance Summary
+    // First, calculate how much space we need
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    
+    // Split summary text to fit within box (180mm width, accounting for 4mm margins on each side)
+    const maxWidth = 180; // Maximum width for text
+    const summaryText = doc.splitTextToSize(getMLSummary(), maxWidth);
+    
+    const lineHeight = 4.5;
+    const titleHeight = 10;
+    const topPadding = 8;
+    const bottomPadding = 6;
+    const leftPadding = 4;
+    
+    // Calculate total height needed
+    const textHeight = summaryText.length * lineHeight;
+    const summaryHeight = titleHeight + topPadding + textHeight + bottomPadding;
+    
+    // Draw the box
+    doc.setFillColor(255, 251, 235); // Light yellow background
+    doc.rect(10, yPos, 190, summaryHeight, 'F');
+    
+    // Draw title
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.text(doc.splitTextToSize(getMLSummary(), 180), 14, 118);
-    // Quiz table
+    doc.text('ML Performance Summary', 14, yPos + topPadding + 6);
+    
+    // Draw summary text
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    let textY = yPos + titleHeight + topPadding;
+    
+    summaryText.forEach((line, index) => {
+      const currentY = textY + (index * lineHeight);
+      // Make sure we don't go outside the box
+      if (currentY < yPos + summaryHeight - bottomPadding) {
+        doc.text(line, 14 + leftPadding, currentY);
+      }
+    });
+    
+    yPos += summaryHeight + 5;
+    
+    // Quiz History Table
     if (quizHistory.length > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Quiz History', 14, yPos);
+      yPos += 5;
+      
       autoTable(doc, {
-        startY: 135,
-        head: [['Quiz #', 'Subject', 'Score', 'Percentage', 'Date']],
+        startY: yPos,
+        head: [['#', 'Subject', 'Score', 'Percentage', 'Date']],
         body: quizHistory.map((q, idx) => [
           idx + 1,
-          q.subject,
+          q.subject.length > 15 ? q.subject.substring(0, 15) + '...' : q.subject,
           `${q.score}/${q.totalQuestions}`,
           `${Math.round((q.score / q.totalQuestions) * 100)}%`,
-          formatDate(q.completedAt)
+          formatDate(q.completedAt).length > 12 ? formatDate(q.completedAt).substring(0, 12) : formatDate(q.completedAt)
         ]),
         theme: 'striped',
-        headStyles: { fillColor: [99, 102, 241] },
-        styles: { fontSize: 10 },
+        headStyles: { 
+          fillColor: [99, 102, 241],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        styles: { 
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          cellWidth: 'wrap'
+        },
+        columnStyles: {
+          0: { cellWidth: 15 }, // #
+          1: { cellWidth: 50 }, // Subject
+          2: { cellWidth: 30 }, // Score
+          3: { cellWidth: 35 }, // Percentage
+          4: { cellWidth: 50 }  // Date
+        },
+        margin: { left: 10, right: 10 },
+      });
+      
+      yPos = doc.lastAutoTable.finalY + 10;
+    }
+    
+    // Exam History Table
+    if (examHistory.length > 0) {
+      // Check if we need a new page
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Exam History', 14, yPos);
+      yPos += 5;
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['#', 'Subject', 'Score', '%', 'Duration', 'Violations', 'Date']],
+        body: examHistory.map((exam, idx) => [
+          idx + 1,
+          exam.subject.length > 12 ? exam.subject.substring(0, 12) + '...' : exam.subject,
+          `${exam.score}/${exam.totalQuestions}`,
+          `${Math.round((exam.score / exam.totalQuestions) * 100)}%`,
+          formatDuration(exam.duration || 0),
+          exam.tabSwitches || 0,
+          formatDate(exam.completedAt).length > 10 ? formatDate(exam.completedAt).substring(0, 10) : formatDate(exam.completedAt)
+        ]),
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [220, 38, 38],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [254, 242, 242] },
+        styles: { 
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          cellWidth: 'wrap'
+        },
+        columnStyles: {
+          0: { cellWidth: 12 }, // #
+          1: { cellWidth: 40 }, // Subject
+          2: { cellWidth: 25 }, // Score
+          3: { cellWidth: 20 }, // Percentage
+          4: { cellWidth: 30 }, // Duration
+          5: { cellWidth: 25 }, // Violations
+          6: { cellWidth: 40 }  // Date
+        },
+        margin: { left: 10, right: 10 },
       });
     }
-    doc.save('StudyHub_User_Report.pdf');
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(
+        `Page ${i} of ${pageCount} | Generated on ${new Date().toLocaleDateString()}`,
+        105,
+        287,
+        { align: 'center' }
+      );
+    }
+    
+    doc.save(`StudyHub_Report_${user.name || 'User'}_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   // Pagination logic
@@ -234,15 +524,60 @@ const Profile = () => {
     setShowQuizModal(true);
   };
 
+  const handleExamClick = (exam, index) => {
+    setSelectedExam({ ...exam, index });
+    setShowExamModal(true);
+  };
+
+  // Exam pagination
+  const indexOfLastExam = currentExamPage * examsPerPage;
+  const indexOfFirstExam = indexOfLastExam - examsPerPage;
+  const currentExams = examHistory.slice(indexOfFirstExam, indexOfLastExam);
+  const totalExamPages = Math.ceil(examHistory.length / examsPerPage);
+
+  const paginateExams = (pageNumber) => setCurrentExamPage(pageNumber);
+
+  // Format duration
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
+
   const stats = calculateStats();
 
-  // Performance Line Graph Data
-  const performanceData = {
-    labels: quizHistory.map((quiz, idx) => `Quiz #${idx + 1}`),
+  // Real-time update state for blinking effect
+  const [graphUpdate, setGraphUpdate] = useState(0);
+
+  // Combined Performance Graph Data (Quiz + Exam in one graph)
+  const combinedPerformanceData = useMemo(() => {
+    // Get the maximum length to create proper labels
+    const maxLength = Math.max(quizHistory.length, examHistory.length);
+    
+    // Create labels based on the maximum length
+    const labels = [];
+    for (let i = 0; i < maxLength; i++) {
+      labels.push(`#${i + 1}`);
+    }
+    
+    // Prepare quiz data (pad with null if needed)
+    const quizData = quizHistory.map(q => Math.round((q.score / q.totalQuestions) * 100));
+    while (quizData.length < maxLength) {
+      quizData.push(null);
+    }
+    
+    // Prepare exam data (pad with null if needed)
+    const examData = examHistory.map(exam => Math.round((exam.score / exam.totalQuestions) * 100));
+    while (examData.length < maxLength) {
+      examData.push(null);
+    }
+    
+    return {
+      labels: labels.length > 0 ? labels : ['No Data'],
     datasets: [
       {
-        label: 'Score (%)',
-        data: quizHistory.map(q => Math.round((q.score / q.totalQuestions) * 100)),
+          label: 'Quiz Score (%)',
+          data: quizData,
         fill: false,
         borderColor: '#6366f1',
         backgroundColor: '#6366f1',
@@ -252,22 +587,65 @@ const Profile = () => {
         pointBackgroundColor: '#fff',
         pointBorderColor: '#6366f1',
         pointBorderWidth: 2,
+          spanGaps: true,
+        },
+        {
+          label: 'Exam Score (%)',
+          data: examData,
+          fill: false,
+          borderColor: '#dc2626',
+          backgroundColor: '#dc2626',
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#dc2626',
+          pointBorderWidth: 2,
+          spanGaps: true,
       },
     ],
   };
+  }, [quizHistory, examHistory, graphUpdate]);
 
-  const performanceOptions = {
+  const combinedPerformanceOptions = {
     responsive: true,
+    animation: false,
     plugins: {
       legend: {
-        display: false,
+        display: true,
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 15,
+          font: {
+            size: 12,
+            weight: 600,
+          },
+        },
       },
       tooltip: {
         callbacks: {
           label: function(context) {
+            const datasetLabel = context.dataset.label || '';
+            const value = context.parsed.y;
+            if (value === null || isNaN(value)) return '';
+            
+            let details = '';
             const idx = context.dataIndex;
-            const quiz = quizHistory[idx];
-            return ` ${quiz.subject} | ${formatDate(quiz.completedAt)} | ${quiz.score}/${quiz.totalQuestions} (${context.parsed.y}%)`;
+            
+            if (datasetLabel.includes('Quiz')) {
+              if (quizHistory[idx]) {
+                const quiz = quizHistory[idx];
+                details = ` ${quiz.subject} | ${formatDate(quiz.completedAt)} | ${quiz.score}/${quiz.totalQuestions} (${value}%)`;
+              }
+            } else if (datasetLabel.includes('Exam')) {
+              if (examHistory[idx]) {
+                const exam = examHistory[idx];
+                details = ` ${exam.subject} | ${formatDate(exam.completedAt)} | ${exam.score}/${exam.totalQuestions} (${value}%) | Duration: ${formatDuration(exam.duration || 0)}`;
+              }
+            }
+            
+            return `${datasetLabel}: ${value}%${details}`;
           },
         },
       },
@@ -289,6 +667,8 @@ const Profile = () => {
         ticks: {
           color: '#6366f1',
           font: { weight: 600 },
+          maxRotation: 45,
+          minRotation: 45,
         },
         grid: {
           color: '#f3f4f6',
@@ -359,7 +739,8 @@ const Profile = () => {
       });
       setUser(res.data.user); // update user state directly
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      // No need to refetch profile here
+      // Dispatch event to notify Header component
+      window.dispatchEvent(new Event('profileUpdated'));
     } catch (err) {
       setUploadError('Image upload failed. Please try again.');
     } finally {
@@ -554,14 +935,15 @@ const Profile = () => {
             </div>
           )}
         </div>
-        {/* Quiz History */}
+        {/* Quiz & Exam History */}
         <div className="col-md-8">
-          <div className="card p-4 shadow-lg" style={{ borderRadius: 18 }}>
+          {/* Quiz History */}
+          <div className="card p-4 shadow-lg mb-4" style={{ borderRadius: 18 }}>
             <h3 className="mb-3" style={{ color: '#6366f1', fontWeight: 700 }}>
               <span role="img" aria-label="quiz">📊</span> Quiz History
             </h3>
             {quizHistory.length === 0 ? (
-              <p className="text-muted text-center">No quizzes completed yet. <a href="/Quiz">Take your first quiz!</a></p>
+              <p className="text-muted text-center">No quizzes completed yet. <a href="/Quiz" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Take your first quiz!</a></p>
             ) : (
               <>
                 <div className="table-responsive">
@@ -640,13 +1022,116 @@ const Profile = () => {
               </>
             )}
           </div>
-          {/* Performance Line Graph (moved below quiz history) */}
-          {quizHistory.length > 0 && (
+
+          {/* Exam History */}
+          <div className="card p-4 shadow-lg mb-4" style={{ borderRadius: 18 }}>
+            <h3 className="mb-3" style={{ color: '#dc2626', fontWeight: 700 }}>
+              <span role="img" aria-label="exam">🎓</span> Exam History
+            </h3>
+            {examHistory.length === 0 ? (
+              <p className="text-muted text-center">No exams completed yet. <a href="/Exam" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Take your first exam!</a></p>
+            ) : (
+              <>
+                <div className="table-responsive">
+                  <table className="table table-striped" style={{ borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+                    <thead style={{ background: '#fee2e2' }}>
+                      <tr>
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Duration</th>
+                        <th>Violations</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentExams.map((exam, index) => (
+                        <tr key={index} className="exam-history-row" style={{ cursor: 'pointer', transition: 'background 0.18s' }}>
+                          <td>
+                            <button
+                              className="btn btn-link btn-sm p-0 me-2"
+                              style={{ textDecoration: 'underline', fontWeight: 500 }}
+                              onClick={() => handleExamClick(exam, index + 1 + indexOfFirstExam)}
+                            >
+                              Exam #{index + 1 + indexOfFirstExam}
+                            </button>
+                            <strong>{exam.subject}</strong>
+                          </td>
+                          <td>{exam.score}/{exam.totalQuestions}</td>
+                          <td className={getScoreColor(exam.score, exam.totalQuestions)}>
+                            <strong>{Math.round((exam.score / exam.totalQuestions) * 100)}%</strong>
+                          </td>
+                          <td>{formatDuration(exam.duration || 0)}</td>
+                          <td>
+                            {exam.tabSwitches > 0 ? (
+                              <span className="badge bg-warning text-dark">{exam.tabSwitches}</span>
+                            ) : (
+                              <span className="badge bg-success">0</span>
+                            )}
+                          </td>
+                          <td>{formatDate(exam.completedAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Exam Pagination */}
+                {totalExamPages > 1 && (
+                  <nav aria-label="Exam history pagination">
+                    <ul className="pagination justify-content-center">
+                      <li className={`page-item ${currentExamPage === 1 ? 'disabled' : ''}`}>
+                        <button 
+                          className="page-link" 
+                          onClick={() => paginateExams(currentExamPage - 1)}
+                          disabled={currentExamPage === 1}
+                        >
+                          Previous
+                        </button>
+                      </li>
+                      {[...Array(totalExamPages)].map((_, index) => (
+                        <li key={index + 1} className={`page-item ${currentExamPage === index + 1 ? 'active' : ''}`}>
+                          <button 
+                            className="page-link" 
+                            onClick={() => paginateExams(index + 1)}
+                          >
+                            {index + 1}
+                          </button>
+                        </li>
+                      ))}
+                      <li className={`page-item ${currentExamPage === totalExamPages ? 'disabled' : ''}`}>
+                        <button 
+                          className="page-link" 
+                          onClick={() => paginateExams(currentExamPage + 1)}
+                          disabled={currentExamPage === totalExamPages}
+                        >
+                          Next
+                        </button>
+                      </li>
+                    </ul>
+                    <div className="text-center mt-2">
+                      <small className="text-muted">
+                        Showing {indexOfFirstExam + 1} to {Math.min(indexOfLastExam, examHistory.length)} of {examHistory.length} exams
+                      </small>
+                    </div>
+                  </nav>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Combined Performance Graph (Quiz + Exam in one box) */}
+          {(quizHistory.length > 0 || examHistory.length > 0) && (
             <div className="card p-4 shadow-lg mt-4" style={{ borderRadius: 18 }}>
               <h4 className="mb-3" style={{ color: '#6366f1', fontWeight: 700 }}>
-                <span role="img" aria-label="trend">📈</span> Performance Trend
+                <span role="img" aria-label="trend">📈</span> Performance Trend (Quiz & Exam)
               </h4>
-              <Line data={performanceData} options={performanceOptions} height={220} />
+              <div key={graphUpdate} style={{ animation: 'fadeIn 0.5s' }}>
+                <Line 
+                  data={combinedPerformanceData} 
+                  options={combinedPerformanceOptions} 
+                  height={280}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -670,10 +1155,72 @@ const Profile = () => {
           </div>
         </div>
       )}
-      {/* Quiz history row hover effect */}
+
+      {/* Exam Details Modal */}
+      {showExamModal && selectedExam && (
+        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.3)' }} tabIndex="-1">
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: 18 }}>
+              <div className="modal-header" style={{ background: '#fee2e2', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
+                <h5 className="modal-title">Exam #{selectedExam.index} - {selectedExam.subject} Details</h5>
+                <button type="button" className="btn-close" onClick={() => setShowExamModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <p><strong>Duration:</strong> {formatDuration(selectedExam.duration || 0)}</p>
+                  <p><strong>Tab Switches:</strong> {selectedExam.tabSwitches || 0}</p>
+                  <p><strong>Face Captured:</strong> {selectedExam.faceCaptured ? 'Yes ✓' : 'No ✗'}</p>
+                </div>
+                {renderQuizDetails(selectedExam)}
+              </div>
+              <div className="modal-footer" style={{ background: '#f8fafc', borderBottomLeftRadius: 18, borderBottomRightRadius: 18 }}>
+                <button className="btn btn-secondary" onClick={() => setShowExamModal(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Quiz and Exam history row hover effect */}
       <style>{`
         .quiz-history-row:hover {
           background: #e0e7ff !important;
+        }
+        .exam-history-row:hover {
+          background: #fee2e2 !important;
+        }
+        
+        /* Blinking animation for real-time indicator */
+        @keyframes blink {
+          0%, 100% { 
+            opacity: 1; 
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 0.3; 
+            transform: scale(0.8);
+          }
+        }
+        
+        /* Pulse animation for graph cards */
+        @keyframes pulse {
+          0%, 100% { 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          50% { 
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+          }
+        }
+        
+        /* Fade in animation for graph updates */
+        @keyframes fadeIn {
+          from { 
+            opacity: 0.5; 
+            transform: translateY(-5px);
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0);
+          }
         }
       `}</style>
     </div>

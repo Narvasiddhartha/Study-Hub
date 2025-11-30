@@ -1,8 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../api/axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as faceapi from 'face-api.js';
+import { SUBJECTS } from '../data/subjects';
+
+const QUIZ_SUMMARY_STORAGE_KEY = 'studyhub:lastQuizSummary';
+const QUIZ_SUMMARY_EVENT = 'studyhub:lastQuizSummary';
+const CHATBOT_INTENT_EVENT = 'studyhub:chatbot-intent';
+const TOGGLE_CHATBOT_EVENT = 'studyhub:toggle-quiz-chatbot';
 
 const SubjectQuiz = () => {
   const { subject } = useParams();
@@ -25,6 +31,112 @@ const SubjectQuiz = () => {
   const [violationCount, setViolationCount] = useState(0);
   const [showViolationWarning, setShowViolationWarning] = useState(false);
   const [streakInfo, setStreakInfo] = useState(null);
+  const [mistakeDetails, setMistakeDetails] = useState([]);
+  const [lastSummary, setLastSummary] = useState(null);
+  const [analysisText, setAnalysisText] = useState('');
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState('');
+
+  const matchedSubjectMeta = useMemo(() => {
+    const lowerParam = subject?.toLowerCase() || '';
+    return (
+      SUBJECTS.find(
+        (entry) =>
+          entry.slug === lowerParam ||
+          entry.name?.toLowerCase() === lowerParam ||
+          entry.shortName?.toLowerCase() === lowerParam
+      ) || null
+    );
+  }, [subject]);
+
+  const getAnswerSnapshot = () => {
+    const snapshot = [...userAnswers];
+    if (selectedOption !== null && selectedOption !== undefined) {
+      snapshot[currentIndex] = selectedOption;
+    }
+    return snapshot;
+  };
+
+  const buildQuizSummary = (finalScoreValue, answersSnapshot) => {
+    if (!questions.length) return null;
+
+    const incorrect = questions
+      .map((question, idx) => {
+        if (!question) return null;
+        const userAnswer = answersSnapshot[idx];
+        if (userAnswer === question.answer) return null;
+        return {
+          question: question.question,
+          correctAnswer: question.answer,
+          userAnswer: userAnswer ?? 'Not answered',
+          explanation: question.explanation || '',
+          topic: question.topic || ''
+        };
+      })
+      .filter(Boolean);
+
+    const total = questions.length || 1;
+    return {
+      subject,
+      score: finalScoreValue,
+      totalQuestions: questions.length,
+      percentage: Math.round((finalScoreValue / total) * 100),
+      incorrect,
+      completedAt: new Date().toISOString()
+    };
+  };
+
+  const persistQuizSummary = (summary) => {
+    if (!summary || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(QUIZ_SUMMARY_STORAGE_KEY, JSON.stringify(summary));
+      window.dispatchEvent(new CustomEvent(QUIZ_SUMMARY_EVENT, { detail: summary }));
+    } catch (error) {
+      console.error('Unable to persist quiz summary', error);
+    }
+  };
+
+  const triggerAIAnalysis = () => {
+    try {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(new CustomEvent(CHATBOT_INTENT_EVENT, {
+        detail: { action: 'quiz-review' }
+      }));
+    } catch (error) {
+      console.error('Unable to trigger StudyBuddy analysis', error);
+    }
+  };
+
+const toggleQuizChatbot = (enabled) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent(TOGGLE_CHATBOT_EVENT, {
+      detail: { enabled }
+    }));
+  } catch (error) {
+    console.error('Unable to toggle StudyBuddy availability during quiz', error);
+  }
+};
+
+const formatSummaryForPrompt = (summary) => {
+  if (!summary) return '';
+  const { subject, score, totalQuestions, percentage, incorrect = [] } = summary;
+  const lines = [
+    `Subject: ${subject}`,
+    `Score: ${score}/${totalQuestions} (${percentage}%)`,
+    'Mistakes:'
+  ];
+  incorrect.forEach((item, idx) => {
+    lines.push(
+      `${idx + 1}. Question: ${item.question}`,
+      `   User answered: ${item.userAnswer}`,
+      `   Correct answer: ${item.correctAnswer}`,
+      item.topic ? `   Topic: ${item.topic}` : null,
+      item.explanation ? `   Provided explanation: ${item.explanation}` : null
+    );
+  });
+  return lines.filter(Boolean).join('\n');
+};
 
   // Format time as MM:SS
   const formatTime = (seconds) => {
@@ -139,6 +251,59 @@ const SubjectQuiz = () => {
     };
   }, []);
 
+  useEffect(() => {
+    toggleQuizChatbot(false);
+    return () => toggleQuizChatbot(false);
+  }, []);
+
+  const requestInlineAnalysis = async (summary) => {
+    if (!summary) return;
+    setAnalysisLoading(true);
+    setAnalysisError('');
+    setAnalysisText('');
+    const subjectMeta = matchedSubjectMeta
+      ? {
+          name: matchedSubjectMeta.name,
+          description: matchedSubjectMeta.description,
+          focus: matchedSubjectMeta.focus,
+          duration: matchedSubjectMeta.duration,
+          topics: matchedSubjectMeta.topics,
+          roadmap: matchedSubjectMeta.roadmap,
+          resources: matchedSubjectMeta.resources?.slice(0, 3) || []
+        }
+      : null;
+    const prompt = [
+      'You are StudyBuddy, a supportive exam coach.',
+      'Analyze the following quiz attempt, highlight overall trends, explain each mistake in 2-3 sentences, and give targeted improvement tips.',
+      formatSummaryForPrompt(summary)
+    ].join('\n\n');
+
+    const payload = {
+      message: prompt,
+      mode: 'quiz-review',
+      quizSummary: summary
+    };
+    if (subjectMeta) {
+      payload.subjectContext = subjectMeta;
+    }
+
+    try {
+      const response = await axios.post('/api/chatbot', payload);
+      setAnalysisText(response.data?.reply || 'Review unavailable.');
+    } catch (error) {
+      console.error('Inline analysis error', error);
+      setAnalysisError('Unable to generate AI review. Try again in a moment.');
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
+
+  const handleRegenerateAnalysis = () => {
+    if (lastSummary) {
+      requestInlineAnalysis(lastSummary);
+    }
+  };
+
   // Timer effect
   useEffect(() => {
     let interval = null;
@@ -172,6 +337,12 @@ const SubjectQuiz = () => {
     setCameraPermission('pending');
     stopVideoStream();
     setUserAnswers([]);
+    setMistakeDetails([]);
+    setLastSummary(null);
+    setAnalysisText('');
+    setAnalysisError('');
+    setAnalysisLoading(false);
+    toggleQuizChatbot(false);
     // Refetch questions to get new shuffled set
     const fetchQuiz = async () => {
       try {
@@ -223,7 +394,7 @@ const fetchQuiz = async () => {
   const getCorrectAnswers = () => questions.map(q => q.answer);
 
   // Save quiz result to user profile
-  const saveQuizResult = async (finalScore, totalQuestions) => {
+  const saveQuizResult = async (finalScore, totalQuestions, answersSnapshot = []) => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('No authentication token found');
@@ -238,7 +409,7 @@ const fetchQuiz = async () => {
         score: finalScore,
         totalQuestions,
         questions: questions.map(q => q.question),
-        userAnswers: userAnswers,
+        userAnswers: answersSnapshot,
         correctAnswers: getCorrectAnswers(),
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -248,6 +419,11 @@ const fetchQuiz = async () => {
       // Get updated streak information
       if (response.data.streak) {
         setStreakInfo(response.data.streak);
+      }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('quizCompleted'));
+        window.dispatchEvent(new Event('streakUpdated'));
       }
     } catch (error) {
       console.error('Error saving quiz result:', error);
@@ -272,7 +448,16 @@ const fetchQuiz = async () => {
     
     setTimerActive(false);
     stopVideoStream(); // Stop video monitoring when quiz ends
-    saveQuizResult(finalScore, questions.length);
+    const answersSnapshot = getAnswerSnapshot();
+    saveQuizResult(finalScore, questions.length, answersSnapshot);
+    const summary = buildQuizSummary(finalScore, answersSnapshot);
+    if (summary) {
+      persistQuizSummary(summary);
+      setMistakeDetails(summary.incorrect || []);
+      setLastSummary(summary);
+      requestInlineAnalysis(summary);
+    }
+    toggleQuizChatbot(true);
     setShowResult(true);
   };
 
@@ -422,7 +607,14 @@ const fetchQuiz = async () => {
       
       {/* Video Monitoring Display */}
       {cameraPermission === 'granted' && videoStream && (
-        <div className="position-fixed" style={{ top: 20, right: 20, zIndex: 1000 }}>
+        <div
+          className="position-fixed"
+          style={{
+            top: 'calc(var(--topbar-height, 80px) + 16px)',
+            right: 20,
+            zIndex: 1100
+          }}
+        >
           <div className="card shadow-sm" style={{ width: 200 }}>
             <div className="card-header bg-dark text-white text-center py-1">
               <small>🎥 Monitoring Active</small>
@@ -571,8 +763,107 @@ const fetchQuiz = async () => {
               </span>
             </div>
           )}
+
+          {mistakeDetails.length > 0 ? (
+            <div className="mt-4 text-start">
+              <h5 className="fw-bold text-primary mb-3">Mistake Breakdown</h5>
+              <div className="row g-3">
+                {mistakeDetails.map((item, idx) => (
+                  <div className="col-12 col-md-6" key={`${item.question}-${idx}`}>
+                    <div
+                      className="h-100 p-3 rounded-4 shadow-sm"
+                      style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}
+                    >
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="badge bg-gradient" style={{ background: 'linear-gradient(90deg,#f97316,#ec4899)' }}>
+                          #{idx + 1}
+                        </span>
+                        <small className="text-muted text-uppercase">{item.topic || 'General'}</small>
+                      </div>
+                      <p className="fw-semibold text-dark mb-2">{item.question}</p>
+                      <p className="mb-1">
+                        <span className="badge bg-danger me-2">Your answer</span>
+                        <span>{item.userAnswer}</span>
+                      </p>
+                      <p className="mb-1">
+                        <span className="badge bg-success me-2">Correct</span>
+                        <span>{item.correctAnswer}</span>
+                      </p>
+                      {item.explanation && (
+                        <p className="text-muted small mb-0">
+                          Hint: {item.explanation}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 text-start">
+              <div className="p-3 rounded-4" style={{ background: '#ecfccb', border: '1px solid #bbf7d0' }}>
+                🎯 Perfect streak on this attempt — no mistakes to review!
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 text-start">
+            <div className="card border-0 shadow-sm rounded-4">
+              <div className="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 className="mb-0">AI Review</h5>
+                  <small className="text-muted">Step-by-step explanation tailored to your performance</small>
+                </div>
+                <button
+                  className="btn btn-outline-primary btn-sm"
+                  onClick={handleRegenerateAnalysis}
+                  disabled={analysisLoading || !lastSummary}
+                >
+                  {analysisLoading ? 'Generating...' : 'Regenerate'}
+                </button>
+              </div>
+              <div className="card-body" style={{ background: '#f8fafc' }}>
+                {analysisLoading && (
+                  <p className="text-muted mb-0">Summarizing your attempt...</p>
+                )}
+                {analysisError && (
+                  <div className="alert alert-warning mb-0">
+                    {analysisError}{' '}
+                    <button
+                      className="btn btn-link btn-sm p-0 ms-1 align-baseline"
+                      onClick={handleRegenerateAnalysis}
+                      disabled={analysisLoading || !lastSummary}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+                {!analysisLoading && !analysisError && analysisText && (
+                  <div className="d-flex flex-column gap-2">
+                    {analysisText
+                      .split(/\n{2,}/)
+                      .filter(Boolean)
+                      .map((chunk, idx) => (
+                        <p key={idx} className="mb-0 text-secondary" style={{ whiteSpace: 'pre-line' }}>
+                          {chunk.trim()}
+                        </p>
+                      ))}
+                  </div>
+                )}
+                {!analysisLoading && !analysisError && !analysisText && (
+                  <p className="text-muted mb-0">Insights will appear here shortly.</p>
+                )}
+              </div>
+            </div>
+          </div>
           
           <div className="mt-3">
+            <button
+              className="btn btn-outline-info me-2"
+              onClick={triggerAIAnalysis}
+            >
+              Open in StudyBuddy
+            </button>
             <button 
               className="btn btn-success me-2" 
               onClick={resetQuiz}

@@ -18,7 +18,6 @@ import Python from './pages/Python';
 import WebDev from './pages/WebDev';
 import SE from './pages/SE';
 import ML from './pages/ML';
-import Placement from './pages/Placement';
 import Resources from './components/Resources';
 import Notes from './pages/Notes';
 import SubjectNotePad from './pages/SubjectNotePad';
@@ -37,10 +36,6 @@ import { useState, useEffect } from 'react';
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
   const [showChatPopup, setShowChatPopup] = useState(false);
-  const [allowQuizChatbot, setAllowQuizChatbot] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return sessionStorage.getItem('studyhub:allowQuizChatbot') === 'true';
-  });
   const location = useLocation();
 
   // Listen for auth changes (login/logout)
@@ -84,18 +79,6 @@ const AppContent = () => {
     sessionStorage.removeItem('chatPopupShown');
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    const handleToggle = (event) => {
-      if (typeof event?.detail?.enabled !== 'boolean') return;
-      setAllowQuizChatbot(event.detail.enabled);
-      sessionStorage.setItem('studyhub:allowQuizChatbot', event.detail.enabled ? 'true' : 'false');
-    };
-    window.addEventListener('studyhub:toggle-quiz-chatbot', handleToggle);
-    return () => {
-      window.removeEventListener('studyhub:toggle-quiz-chatbot', handleToggle);
-    };
-  }, []);
-
   // Check if current route is a quiz or exam route
   const isQuizRoute = location.pathname.startsWith('/quiz/') || location.pathname.startsWith('/exam/');
   const isExamRoute = location.pathname.startsWith('/exam/');
@@ -129,7 +112,6 @@ const AppContent = () => {
       <Route path="/web-dev" element={<WebDev />} />
       <Route path="/se" element={<SE />} />
       <Route path="/ml" element={<ML />} />
-      <Route path="/placement" element={<Placement />} />
       <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
       <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
       <Route path="/notes/:subject" element={<ProtectedRoute><SubjectNotePad /></ProtectedRoute>} />
@@ -147,8 +129,8 @@ const AppContent = () => {
       
       {/* Hide footer during exam */}
       {!isExamRoute && <Footer />}
-      {/* Hide chatbot during quiz unless explicitly enabled (e.g., on results) */}
-      {isAuthenticated && (!isQuizRoute || allowQuizChatbot) && <Chatbot />}
+      {/* Hide chatbot when on quiz route */}
+      {isAuthenticated && !isQuizRoute && <Chatbot />}
       {/* Chat helper popup removed as requested */}
     </>
   );

@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js'; // <-- this line
 import resourceRoutes from './routes/resources.js';
 import contactRoutes from './routes/contact.js';
 import quizRoutes from './routes/quiz.js';
+import examRoutes from './routes/exam.js';
 import chatbotRoutes from './routes/chatbot.js';
 import aiRecommendationsRoutes from './routes/aiRecommendations.js';
 import executeRoutes from './routes/execute.js';
@@ -24,6 +25,7 @@ app.use('/auth', authRoutes);
 app.use('/resources', resourceRoutes);
 app.use('/contact', contactRoutes);
 app.use('/quiz', quizRoutes);
+app.use('/exam', examRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/ai-recommendations', aiRecommendationsRoutes);
 app.use('/api/execute', executeRoutes);

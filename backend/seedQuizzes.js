@@ -31,6 +31,22 @@ const quizQuestions = [
   { subject: 'Java', question: 'Which of these is returned by operators &, |?', options: ['Integer', 'Boolean', 'Character', 'Float'], answer: 'Integer' },
   { subject: 'Java', question: 'What is the range of short data type in Java?', options: ['-128 to 127', '-32768 to 32767', '-2147483648 to 2147483647', 'None'], answer: '-32768 to 32767' },
   { subject: 'Java', question: 'Which of the following is the correct way of implementing an interface?', options: ['class className extends interfaceName', 'class className implements interfaceName', 'class className imports interfaceName', 'None'], answer: 'class className implements interfaceName' },
+  // Additional Java questions to reach 40
+  { subject: 'Java', question: 'Which keyword is used to declare a variable that cannot be modified after assignment?', options: ['static', 'const', 'final', 'volatile'], answer: 'final' },
+  { subject: 'Java', question: 'Which collection implementation does not allow duplicate elements?', options: ['ArrayList', 'HashMap', 'HashSet', 'LinkedList'], answer: 'HashSet' },
+  { subject: 'Java', question: 'Which class provides a dynamic array implementation in the Collections Framework?', options: ['Array', 'ArrayList', 'HashSet', 'TreeMap'], answer: 'ArrayList' },
+  { subject: 'Java', question: 'Which method must be called on a Thread instance to begin execution?', options: ['run()', 'start()', 'execute()', 'launch()'], answer: 'start()' },
+  { subject: 'Java', question: 'In which package is the List interface defined?', options: ['java.io', 'java.lang', 'java.util', 'java.net'], answer: 'java.util' },
+  { subject: 'Java', question: 'What is the default value of a boolean instance variable?', options: ['true', 'false', 'null', '0'], answer: 'false' },
+  { subject: 'Java', question: 'Which block always executes regardless of whether an exception occurs?', options: ['try', 'catch', 'finally', 'throw'], answer: 'finally' },
+  { subject: 'Java', question: 'Which keyword is used for class inheritance?', options: ['implements', 'inherits', 'extends', 'instanceof'], answer: 'extends' },
+  { subject: 'Java', question: 'Which exception is thrown when dividing an integer by zero?', options: ['NullPointerException', 'ArrayIndexOutOfBoundsException', 'ArithmeticException', 'IllegalArgumentException'], answer: 'ArithmeticException' },
+  { subject: 'Java', question: 'What does JVM stand for?', options: ['Java Variable Manager', 'Java Virtual Machine', 'Java Version Manager', 'Java Visual Machine'], answer: 'Java Virtual Machine' },
+  { subject: 'Java', question: 'Which operator performs a short-circuit logical AND?', options: ['&', '&&', '|', '||'], answer: '&&' },
+  { subject: 'Java', question: 'Which class is a non-synchronized, mutable alternative to StringBuffer?', options: ['String', 'StringBuilder', 'StringTokenizer', 'StringJoiner'], answer: 'StringBuilder' },
+  { subject: 'Java', question: 'Which method can be invoked to suggest garbage collection?', options: ['Runtime.collect()', 'System.clean()', 'System.gc()', 'Runtime.dispose()'], answer: 'System.gc()' },
+  { subject: 'Java', question: 'A lambda expression in Java can target an interface that contains ________.', options: ['Multiple abstract methods', 'Exactly one abstract method', 'Only default methods', 'Only static methods'], answer: 'Exactly one abstract method' },
+  { subject: 'Java', question: 'What is the size of an int in Java?', options: ['8 bits', '16 bits', '32 bits', '64 bits'], answer: '32 bits' },
 
   // Python Questions (25 questions)
   { subject: 'Python', question: 'What is the correct extension of the Python file?', options: ['.python', '.pl', '.py', '.p'], answer: '.py' },
@@ -58,6 +74,22 @@ const quizQuestions = [
   { subject: 'Python', question: 'What will be the output of the following Python code? x = "abcdef" i = "" for i in x: print(i, end=" ")', options: ['a b c d e f', 'abcdef', 'f', 'error'], answer: 'a b c d e f' },
   { subject: 'Python', question: 'Which of the following is used to create an empty set in Python?', options: ['()', '[]', '{}', 'set()'], answer: 'set()' },
   { subject: 'Python', question: 'What is the output of print(type([]) is list)?', options: ['True', 'False', 'Error', 'None'], answer: 'True' },
+  // Additional Python questions to reach 40
+  { subject: 'Python', question: 'What type is returned by the range() function in Python 3?', options: ['list', 'tuple', 'range', 'generator'], answer: 'range' },
+  { subject: 'Python', question: 'Which built-in data structure is immutable?', options: ['list', 'set', 'tuple', 'dictionary'], answer: 'tuple' },
+  { subject: 'Python', question: 'Which keyword begins a block that handles exceptions?', options: ['catch', 'try', 'except', 'raise'], answer: 'try' },
+  { subject: 'Python', question: 'Which module is commonly used for working with dates and times?', options: ['datetime', 'math', 'timeit', 'pickle'], answer: 'datetime' },
+  { subject: 'Python', question: 'Which of the following is a valid list comprehension that creates squares of numbers 0-4?', options: ['[x * x for x in range(5)]', '[x ** 2 : x in range(5)]', '(x * x, x in range(5))', '{x * x | x in range(5)}'], answer: '[x * x for x in range(5)]' },
+  { subject: 'Python', question: 'What does *args represent when used in a function definition?', options: ['Keyword arguments', 'Variable-length positional arguments', 'Default arguments', 'Global arguments'], answer: 'Variable-length positional arguments' },
+  { subject: 'Python', question: 'Which method is used to add an element to a set?', options: ['append()', 'add()', 'push()', 'insert()'], answer: 'add()' },
+  { subject: 'Python', question: 'What is the result of bool(0)?', options: ['0', 'True', 'False', 'None'], answer: 'False' },
+  { subject: 'Python', question: 'Which keyword is used inside a generator function to produce values lazily?', options: ['return', 'yield', 'generate', 'async'], answer: 'yield' },
+  { subject: 'Python', question: 'In a class method definition, what does the parameter self refer to?', options: ['The module', 'The class itself', 'The current instance', 'A superclass'], answer: 'The current instance' },
+  { subject: 'Python', question: 'Which statement ensures that a file is automatically closed after its suite finishes?', options: ['use(file)', 'with open("file") as f', 'try open("file")', 'auto open("file")'], answer: 'with open("file") as f' },
+  { subject: 'Python', question: 'Which module should be imported to generate random numbers?', options: ['math', 'random', 'statistics', 'numbers'], answer: 'random' },
+  { subject: 'Python', question: 'What does the break statement do inside a loop?', options: ['Skips to next iteration', 'Exits the innermost loop', 'Restarts the loop', 'Raises an error'], answer: 'Exits the innermost loop' },
+  { subject: 'Python', question: 'What is the primary purpose of virtualenv/venv in Python projects?', options: ['Compile Python code', 'Create isolated environments for dependencies', 'Speed up execution', 'Install global packages'], answer: 'Create isolated environments for dependencies' },
+  { subject: 'Python', question: 'What data type is produced by the expression {x: x * x for x in range(3)}?', options: ['list', 'set', 'tuple', 'dict'], answer: 'dict' },
 
   // DSA Questions (25 questions)
   { subject: 'DSA', question: 'What is the time complexity of binary search?', options: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'], answer: 'O(log n)' },
@@ -85,6 +117,22 @@ const quizQuestions = [
   { subject: 'DSA', question: 'What is the space complexity of quicksort in the average case?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], answer: 'O(log n)' },
   { subject: 'DSA', question: 'Which data structure allows insertion and deletion at both ends?', options: ['Stack', 'Queue', 'Deque', 'Priority Queue'], answer: 'Deque' },
   { subject: 'DSA', question: 'What is the time complexity of counting sort?', options: ['O(n)', 'O(n + k)', 'O(n log n)', 'O(n²)'], answer: 'O(n + k)' },
+  // Additional DSA questions to reach 40
+  { subject: 'DSA', question: 'What condition must hold for every node in an AVL tree?', options: ['Children must be full', 'Balance factor must be 0', 'Height difference between subtrees is at most 1', 'All leaves at same depth'], answer: 'Height difference between subtrees is at most 1' },
+  { subject: 'DSA', question: 'Which algorithm can be used to find strongly connected components in a directed graph?', options: ['Prim', 'Kosaraju', 'Kruskal', 'Huffman'], answer: 'Kosaraju' },
+  { subject: 'DSA', question: 'Which hashing collision resolution technique stores a linked list at each bucket?', options: ['Open addressing', 'Quadratic probing', 'Double hashing', 'Chaining'], answer: 'Chaining' },
+  { subject: 'DSA', question: 'In a circular queue of size n, the queue is full when ______.', options: ['front == rear', '(rear + 1) % n == front', 'rear == n - 1', 'front == -1'], answer: '(rear + 1) % n == front' },
+  { subject: 'DSA', question: 'Which traversal visits a binary tree in the order root-left-right?', options: ['Inorder', 'Postorder', 'Preorder', 'Level order'], answer: 'Preorder' },
+  { subject: 'DSA', question: 'Which data structure is typically used to implement undo functionality in editors?', options: ['Queue', 'Stack', 'Deque', 'Priority Queue'], answer: 'Stack' },
+  { subject: 'DSA', question: 'Which algorithm multiplies matrices faster than the conventional O(n^3) method?', options: ['Karatsuba', 'Strassen', 'Floyd-Warshall', 'Bellman-Ford'], answer: 'Strassen' },
+  { subject: 'DSA', question: 'What is the time complexity of building a binary heap from n elements?', options: ['O(n log n)', 'O(n)', 'O(log n)', 'O(n²)'], answer: 'O(n)' },
+  { subject: 'DSA', question: 'Which algorithm can detect negative-weight cycles in a graph?', options: ['Dijkstra', 'Prim', 'Bellman-Ford', 'Kruskal'], answer: 'Bellman-Ford' },
+  { subject: 'DSA', question: 'Which property is true for every path from root to leaf in a red-black tree?', options: ['Same number of nodes', 'Same number of black nodes', 'Same number of red nodes', 'Strictly increasing keys'], answer: 'Same number of black nodes' },
+  { subject: 'DSA', question: 'Which representation is preferred for sparse graphs?', options: ['Adjacency matrix', 'Adjacency list', 'Incidence matrix', 'Edge list only'], answer: 'Adjacency list' },
+  { subject: 'DSA', question: 'Which greedy algorithm builds an optimal prefix code based on character frequency?', options: ['Prim', 'Huffman Coding', 'Dijkstra', 'A*'], answer: 'Huffman Coding' },
+  { subject: 'DSA', question: 'What is the amortized complexity of push/pop operations on a stack implemented using a dynamic array?', options: ['O(n)', 'O(log n)', 'O(1)', 'O(n log n)'], answer: 'O(1)' },
+  { subject: 'DSA', question: 'Which heap structure ensures every parent node is greater than its children?', options: ['Min heap', 'Max heap', 'Fibonacci heap', 'Binomial heap'], answer: 'Max heap' },
+  { subject: 'DSA', question: 'Which traversal of an expression tree yields the postfix (Reverse Polish) notation?', options: ['Inorder', 'Preorder', 'Postorder', 'Level order'], answer: 'Postorder' },
 
   // Add more subjects with 20+ questions each...
   // DBMS Questions (20 questions)
@@ -109,6 +157,28 @@ const quizQuestions = [
   { subject: 'DBMS', question: 'What is a trigger?', options: ['A special procedure', 'A table', 'An index', 'A constraint'], answer: 'A special procedure' },
   { subject: 'DBMS', question: 'Which of the following is not a NoSQL database?', options: ['MongoDB', 'Cassandra', 'MySQL', 'Redis'], answer: 'MySQL' },
 
+  // Additional DBMS questions to reach 40
+  { subject: 'DBMS', question: 'Which SQL clause is used to filter aggregated results?', options: ['WHERE', 'HAVING', 'GROUP BY', 'ORDER BY'], answer: 'HAVING' },
+  { subject: 'DBMS', question: 'What is a surrogate key?', options: ['A natural key', 'An artificial key with no business meaning', 'A foreign key', 'A composite key'], answer: 'An artificial key with no business meaning' },
+  { subject: 'DBMS', question: 'Which SQL command permanently saves the current transaction?', options: ['SAVEPOINT', 'ROLLBACK', 'COMMIT', 'GRANT'], answer: 'COMMIT' },
+  { subject: 'DBMS', question: 'Which command reverses changes back to the last commit?', options: ['REVOKE', 'ROLLBACK', 'SAVEPOINT', 'MERGE'], answer: 'ROLLBACK' },
+  { subject: 'DBMS', question: 'Which isolation level prevents phantom reads?', options: ['Read Uncommitted', 'Read Committed', 'Repeatable Read', 'Serializable'], answer: 'Serializable' },
+  { subject: 'DBMS', question: 'What does ON DELETE CASCADE ensure?', options: ['Parent rows cannot be deleted', 'Child rows are automatically deleted', 'Deletes entire table', 'Disables foreign keys'], answer: 'Child rows are automatically deleted' },
+  { subject: 'DBMS', question: 'Which index stores table rows physically in sorted order?', options: ['Bitmap index', 'Clustered index', 'Non-clustered index', 'Hash index'], answer: 'Clustered index' },
+  { subject: 'DBMS', question: 'Which SQL function counts unique non-null values?', options: ['COUNT(*)', 'COUNT(DISTINCT column)', 'SUM(column)', 'AVG(column)'], answer: 'COUNT(DISTINCT column)' },
+  { subject: 'DBMS', question: 'What is the main objective of normalization?', options: ['Increase redundancy', 'Reduce redundancy and anomalies', 'Speed up queries only', 'Encrypt data'], answer: 'Reduce redundancy and anomalies' },
+  { subject: 'DBMS', question: 'What is a composite key?', options: ['A key from another table', 'A key composed of multiple columns', 'A surrogate key', 'A nullable key'], answer: 'A key composed of multiple columns' },
+  { subject: 'DBMS', question: 'Which SQL statement modifies existing rows in a table?', options: ['ALTER', 'UPDATE', 'INSERT', 'CREATE'], answer: 'UPDATE' },
+  { subject: 'DBMS', question: 'A transaction is best described as ________.', options: ['A background process', 'A single SQL statement', 'A logical unit of work that is atomic', 'A database trigger'], answer: 'A logical unit of work that is atomic' },
+  { subject: 'DBMS', question: 'Which join returns only the rows with matching keys in both tables?', options: ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'FULL OUTER JOIN'], answer: 'INNER JOIN' },
+  { subject: 'DBMS', question: 'What does the SQL GRANT statement do?', options: ['Creates a table', 'Provides privileges to users', 'Backs up the database', 'Removes privileges'], answer: 'Provides privileges to users' },
+  { subject: 'DBMS', question: 'Which command removes all rows from a table but keeps the structure?', options: ['DROP', 'DELETE', 'TRUNCATE', 'ALTER'], answer: 'TRUNCATE' },
+  { subject: 'DBMS', question: 'How does a UNIQUE constraint differ from a PRIMARY KEY?', options: ['UNIQUE allows null values', 'UNIQUE enforces referential integrity', 'PRIMARY KEY allows duplicates', 'There is no difference'], answer: 'UNIQUE allows null values' },
+  { subject: 'DBMS', question: 'Which concurrency control technique relies on timestamps instead of locks?', options: ['Two-phase locking', 'Timestamp ordering', 'Deadlock detection', 'Lock escalation'], answer: 'Timestamp ordering' },
+  { subject: 'DBMS', question: 'What does WITH CHECK OPTION enforce on a view?', options: ['Prevents updates', 'Ensures inserted/updated rows satisfy the view condition', 'Disables indexing', 'Caches the view'], answer: 'Ensures inserted/updated rows satisfy the view condition' },
+  { subject: 'DBMS', question: 'Which type of backup stores only the changes since the last full backup?', options: ['Full backup', 'Differential backup', 'Incremental backup', 'Logical backup'], answer: 'Differential backup' },
+  { subject: 'DBMS', question: 'Which SQL command adds a new column to an existing table?', options: ['CREATE COLUMN', 'ALTER TABLE ... ADD COLUMN', 'UPDATE TABLE', 'INSERT COLUMN'], answer: 'ALTER TABLE ... ADD COLUMN' },
+
   // Add more subjects similarly...
   // Operating Systems (20 questions)
   { subject: 'Operating Systems', question: 'What is an operating system?', options: ['System software', 'Application software', 'Hardware', 'Firmware'], answer: 'System software' },
@@ -131,6 +201,27 @@ const quizQuestions = [
   { subject: 'Operating Systems', question: 'Which is not a process state?', options: ['New', 'Running', 'Waiting', 'Completed'], answer: 'Completed' },
   { subject: 'Operating Systems', question: 'What is spooling?', options: ['Simultaneous Peripheral Operations Online', 'Process scheduling', 'Memory management', 'None'], answer: 'Simultaneous Peripheral Operations Online' },
   { subject: 'Operating Systems', question: 'Which command is used to display running processes?', options: ['ls', 'ps', 'top', 'Both ps and top'], answer: 'Both ps and top' },
+  // Additional Operating Systems questions to reach 40
+  { subject: 'Operating Systems', question: 'What information is stored in a Process Control Block (PCB)?', options: ['Only process ID', 'Process state and context information', 'Only scheduling priority', 'Only memory map'], answer: 'Process state and context information' },
+  { subject: 'Operating Systems', question: 'Which scheduling algorithm preempts the running process if a higher-priority process arrives?', options: ['FCFS', 'Non-preemptive priority', 'Preemptive priority', 'Multilevel queue'], answer: 'Preemptive priority' },
+  { subject: 'Operating Systems', question: 'Starvation occurs when ______.', options: ['Processes share resources equally', 'A process waits indefinitely for a resource', 'Deadlock is detected', 'CPU utilization is 100%'], answer: 'A process waits indefinitely for a resource' },
+  { subject: 'Operating Systems', question: 'Imposing a strict ordering on resource acquisition prevents which deadlock condition?', options: ['No preemption', 'Hold and wait', 'Circular wait', 'Mutual exclusion'], answer: 'Circular wait' },
+  { subject: 'Operating Systems', question: 'What does the working set model track?', options: ['Processes in ready queue', 'Pages actively used by a process', 'CPU utilization', 'Open files'], answer: 'Pages actively used by a process' },
+  { subject: 'Operating Systems', question: 'What does the dirty bit in a page table entry indicate?', options: ['Page has never been used', 'Page is shared', 'Page has been modified', 'Page is locked'], answer: 'Page has been modified' },
+  { subject: 'Operating Systems', question: 'Copy-on-write optimization delays copying of pages until ______.', options: ['The system reboots', 'A read operation occurs', 'One of the processes tries to modify the page', 'The page is swapped out'], answer: 'One of the processes tries to modify the page' },
+  { subject: 'Operating Systems', question: 'Which disk scheduling algorithm can cause starvation for outer tracks?', options: ['FCFS', 'SSTF', 'SCAN', 'LOOK'], answer: 'SSTF' },
+  { subject: 'Operating Systems', question: 'A wait-for graph is used for ______.', options: ['CPU scheduling', 'Deadlock detection', 'Memory allocation', 'Interrupt handling'], answer: 'Deadlock detection' },
+  { subject: 'Operating Systems', question: 'What is the primary role of a device driver?', options: ['Manage user interfaces', 'Translate high-level code', 'Act as an interface between OS and hardware device', 'Schedule CPU processes'], answer: 'Act as an interface between OS and hardware device' },
+  { subject: 'Operating Systems', question: 'Which Unix command sends a signal to terminate or control processes?', options: ['ps', 'kill', 'grep', 'sed'], answer: 'kill' },
+  { subject: 'Operating Systems', question: 'What structure keeps track of free and allocated disk blocks in FAT-based systems?', options: ['Inode table', 'File allocation table', 'Boot block', 'Superblock'], answer: 'File allocation table' },
+  { subject: 'Operating Systems', question: 'What is the main advantage of I/O buffering?', options: ['Eliminates interrupts', 'Matches speed between devices and CPU', 'Increases fragmentation', 'Reduces cache size'], answer: 'Matches speed between devices and CPU' },
+  { subject: 'Operating Systems', question: 'In Round Robin scheduling, which parameter heavily influences response time?', options: ['Context switch time', 'Time quantum', 'Process ID', 'Cache size'], answer: 'Time quantum' },
+  { subject: 'Operating Systems', question: 'The clock (second-chance) page replacement algorithm is an approximation of which algorithm?', options: ['LFU', 'Optimal', 'LRU', 'FIFO'], answer: 'LRU' },
+  { subject: 'Operating Systems', question: 'A logical address is generated by the ______, while a physical address is seen by the ______.', options: ['Memory, CPU', 'CPU, memory unit', 'Cache, CPU', 'Disk, MMU'], answer: 'CPU, memory unit' },
+  { subject: 'Operating Systems', question: 'Which scheduler determines which processes are admitted into the ready queue?', options: ['Long-term scheduler', 'Medium-term scheduler', 'Short-term scheduler', 'Dispatcher'], answer: 'Long-term scheduler' },
+  { subject: 'Operating Systems', question: 'What is demand paging?', options: ['Loading entire process into memory at once', 'Loading pages only when they are referenced', 'Prefetching all pages proactively', 'Locking critical pages permanently'], answer: 'Loading pages only when they are referenced' },
+  { subject: 'Operating Systems', question: 'Swap space is primarily used to ______.', options: ['Store executable binaries permanently', 'Extend the virtual memory beyond physical memory', 'Cache disk blocks', 'Hold device drivers'], answer: 'Extend the virtual memory beyond physical memory' },
+  { subject: 'Operating Systems', question: 'Which component handles hardware interrupts and invokes the appropriate handler?', options: ['Scheduler', 'Dispatcher', 'Interrupt service routine', 'Linker'], answer: 'Interrupt service routine' },
 
   // Computer Networks Questions (25 questions)
   { subject: 'Computer Networks', question: 'What does OSI stand for?', options: ['Open Systems Interconnection', 'Operating Systems Interface', 'Open Source Initiative', 'None'], answer: 'Open Systems Interconnection' },
@@ -158,6 +249,22 @@ const quizQuestions = [
   { subject: 'Computer Networks', question: 'What does CSMA/CD stand for?', options: ['Carrier Sense Multiple Access/Collision Detection', 'Computer Systems Multiple Access', 'None', 'All'], answer: 'Carrier Sense Multiple Access/Collision Detection' },
   { subject: 'Computer Networks', question: 'Which layer is responsible for data encryption?', options: ['Physical', 'Data Link', 'Network', 'Presentation'], answer: 'Presentation' },
   { subject: 'Computer Networks', question: 'What is the purpose of ICMP?', options: ['Internet Control Message Protocol', 'Internet Connection Management Protocol', 'None', 'All'], answer: 'Internet Control Message Protocol' },
+  // Additional Computer Networks questions to reach 40
+  { subject: 'Computer Networks', question: 'Which OSI layer provides end-to-end reliability and flow control?', options: ['Physical', 'Network', 'Transport', 'Session'], answer: 'Transport' },
+  { subject: 'Computer Networks', question: 'Which protocol dynamically assigns IP addresses to hosts?', options: ['DNS', 'DHCP', 'SMTP', 'SNMP'], answer: 'DHCP' },
+  { subject: 'Computer Networks', question: 'What is the default subnet mask for a Class C IPv4 network?', options: ['255.0.0.0', '255.255.0.0', '255.255.255.0', '255.255.255.128'], answer: '255.255.255.0' },
+  { subject: 'Computer Networks', question: 'Which device operates primarily at the Data Link layer?', options: ['Hub', 'Switch', 'Router', 'Gateway'], answer: 'Switch' },
+  { subject: 'Computer Networks', question: 'What is the function of a router in a network?', options: ['Amplify signals', 'Forward packets between networks based on IP addresses', 'Convert analog to digital', 'Filter MAC addresses'], answer: 'Forward packets between networks based on IP addresses' },
+  { subject: 'Computer Networks', question: 'Which wireless standard operates primarily in the 5 GHz band and supports high throughput?', options: ['802.11b', '802.11g', '802.11ac', '802.3'], answer: '802.11ac' },
+  { subject: 'Computer Networks', question: 'Which command is commonly used to test connectivity by sending ICMP echo requests?', options: ['ftp', 'ping', 'nslookup', 'telnet'], answer: 'ping' },
+  { subject: 'Computer Networks', question: 'What does the Time To Live (TTL) field in an IP packet control?', options: ['Packet size', 'Encryption level', 'Maximum number of hops a packet can traverse', 'Source port'], answer: 'Maximum number of hops a packet can traverse' },
+  { subject: 'Computer Networks', question: 'Which protocol provides secure encrypted communication over HTTP?', options: ['FTP', 'SSH', 'HTTPS', 'SNTP'], answer: 'HTTPS' },
+  { subject: 'Computer Networks', question: 'Which topology connects devices along a single backbone cable?', options: ['Star', 'Ring', 'Bus', 'Mesh'], answer: 'Bus' },
+  { subject: 'Computer Networks', question: 'Which security device filters traffic based on predefined rules at the network perimeter?', options: ['Repeater', 'Firewall', 'Hub', 'Bridge'], answer: 'Firewall' },
+  { subject: 'Computer Networks', question: 'Which port is used by SSH by default?', options: ['21', '22', '23', '25'], answer: '22' },
+  { subject: 'Computer Networks', question: 'Which routing protocol is an example of a distance-vector protocol?', options: ['OSPF', 'BGP', 'RIP', 'IS-IS'], answer: 'RIP' },
+  { subject: 'Computer Networks', question: 'A man-in-the-middle attack is an example of which security threat?', options: ['Passive eavesdropping', 'Active interception and alteration', 'Physical theft', 'Hardware failure'], answer: 'Active interception and alteration' },
+  { subject: 'Computer Networks', question: 'What is Maximum Transmission Unit (MTU)?', options: ['Number of hosts allowed', 'Maximum payload size that can be sent on a link', 'Amount of buffer memory', 'Length of MAC address'], answer: 'Maximum payload size that can be sent on a link' },
 
   // Web Development Questions (25 questions)
   { subject: 'Web Development', question: 'What does HTML stand for?', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'None'], answer: 'Hyper Text Markup Language' },
@@ -185,6 +292,22 @@ const quizQuestions = [
   { subject: 'Web Development', question: 'What does JSON stand for?', options: ['JavaScript Object Notation', 'Java Standard Object Notation', 'JavaScript Oriented Notation', 'None'], answer: 'JavaScript Object Notation' },
   { subject: 'Web Development', question: 'Which method is used to parse a string to an integer in JavaScript?', options: ['parseInt()', 'parseInteger()', 'int()', 'Integer()'], answer: 'parseInt()' },
   { subject: 'Web Development', question: 'What is the purpose of the DOCTYPE declaration?', options: ['To specify the HTML version', 'To link CSS files', 'To include JavaScript', 'None'], answer: 'To specify the HTML version' },
+  // Additional Web Development questions to reach 40
+  { subject: 'Web Development', question: 'Which HTML element represents navigation links?', options: ['<section>', '<nav>', '<header>', '<aside>'], answer: '<nav>' },
+  { subject: 'Web Development', question: 'Which CSS declaration enables flexbox layout?', options: ['display: inline', 'display: block', 'display: flex', 'position: flex'], answer: 'display: flex' },
+  { subject: 'Web Development', question: 'Which HTTP status code indicates a permanent redirect?', options: ['200', '301', '404', '500'], answer: '301' },
+  { subject: 'Web Development', question: 'Which attribute opens a hyperlink in a new browser tab?', options: ['rel', 'target="_blank"', 'href', 'title'], answer: 'target="_blank"' },
+  { subject: 'Web Development', question: 'Which CSS property controls the spacing between lines of text?', options: ['letter-spacing', 'line-height', 'text-spacing', 'word-spacing'], answer: 'line-height' },
+  { subject: 'Web Development', question: 'Which JavaScript function converts a JSON string into an object?', options: ['JSON.stringify', 'JSON.parse', 'parseJSON', 'JSON.toObject'], answer: 'JSON.parse' },
+  { subject: 'Web Development', question: 'Which semantic HTML element is used for self-contained content such as blog posts?', options: ['<div>', '<article>', '<span>', '<cite>'], answer: '<article>' },
+  { subject: 'Web Development', question: 'Which CSS selector targets the element with id "header"?', options: ['header', '.header', '#header', '*header'], answer: '#header' },
+  { subject: 'Web Development', question: 'Which HTTP method is typically used to update an entire resource and is idempotent?', options: ['POST', 'GET', 'PUT', 'PATCH'], answer: 'PUT' },
+  { subject: 'Web Development', question: 'Which meta tag helps make a webpage responsive on mobile devices?', options: ['<meta charset="UTF-8">', '<meta name="viewport" content="width=device-width, initial-scale=1.0">', '<meta http-equiv="refresh" content="30">', '<meta name="robots" content="index">'], answer: '<meta name="viewport" content="width=device-width, initial-scale=1.0">' },
+  { subject: 'Web Development', question: 'Which CSS property adds a shadow effect around a box element?', options: ['text-shadow', 'box-shadow', 'shadow', 'filter-shadow'], answer: 'box-shadow' },
+  { subject: 'Web Development', question: 'Which JavaScript keyword declares a block-scoped variable?', options: ['var', 'let', 'const', 'static'], answer: 'let' },
+  { subject: 'Web Development', question: 'Which Web Storage API stores data for the duration of the page session?', options: ['cookies', 'localStorage', 'sessionStorage', 'IndexedDB'], answer: 'sessionStorage' },
+  { subject: 'Web Development', question: 'Which CSS unit scales relative to the root font size?', options: ['px', 'em', 'rem', '%'], answer: 'rem' },
+  { subject: 'Web Development', question: 'Which attribute is required on the <img> tag for accessibility and SEO?', options: ['srcset', 'loading', 'alt', 'title'], answer: 'alt' },
 
   // Software Engineering Questions (25 questions)
   { subject: 'Software Engineering', question: 'What does SDLC stand for?', options: ['Software Development Life Cycle', 'System Development Life Cycle', 'Software Design Life Cycle', 'None'], answer: 'Software Development Life Cycle' },
@@ -212,6 +335,22 @@ const quizQuestions = [
   { subject: 'Software Engineering', question: 'What does GUI stand for?', options: ['Graphical User Interface', 'General User Interface', 'Global User Interface', 'None'], answer: 'Graphical User Interface' },
   { subject: 'Software Engineering', question: 'Which testing is performed by end users?', options: ['Unit Testing', 'Integration Testing', 'System Testing', 'Acceptance Testing'], answer: 'Acceptance Testing' },
   { subject: 'Software Engineering', question: 'What is the purpose of software metrics?', options: ['To measure software quality', 'To increase cost', 'To delay project', 'None'], answer: 'To measure software quality' },
+  // Additional Software Engineering questions to reach 40
+  { subject: 'Software Engineering', question: 'What does the COCOMO model estimate?', options: ['User satisfaction', 'Software development effort and cost', 'Network latency', 'Hardware requirements'], answer: 'Software development effort and cost' },
+  { subject: 'Software Engineering', question: 'In Scrum, which artifact contains the prioritized list of features?', options: ['Sprint backlog', 'Product backlog', 'Burndown chart', 'Definition of Done'], answer: 'Product backlog' },
+  { subject: 'Software Engineering', question: 'Which Agile ceremony focuses on planning the work for the upcoming iteration?', options: ['Daily standup', 'Sprint planning', 'Sprint review', 'Sprint retrospective'], answer: 'Sprint planning' },
+  { subject: 'Software Engineering', question: 'What is the primary goal of a sprint retrospective?', options: ['Demonstrate completed work', 'Estimate backlog items', 'Inspect and adapt the process', 'Refine acceptance criteria'], answer: 'Inspect and adapt the process' },
+  { subject: 'Software Engineering', question: 'Which testing ensures that recent code changes have not broken existing functionality?', options: ['Unit testing', 'Regression testing', 'Stress testing', 'Alpha testing'], answer: 'Regression testing' },
+  { subject: 'Software Engineering', question: 'Pair programming refers to ______.', options: ['Two testers executing the same test', 'Two developers working together at one workstation', 'Developers pairing with customers', 'Parallel compilation'], answer: 'Two developers working together at one workstation' },
+  { subject: 'Software Engineering', question: 'What does MoSCoW prioritization stand for?', options: ['Must have, Should have, Could have, Won’t have', 'More or Same, Choose or Wait', 'Most critical software workflow', 'None'], answer: 'Must have, Should have, Could have, Won’t have' },
+  { subject: 'Software Engineering', question: 'Verification in software engineering asks whether we are ______.', options: ['Building the product right', 'Building the right product', 'Meeting market demand', 'Ready to deploy'], answer: 'Building the product right' },
+  { subject: 'Software Engineering', question: 'Which process model explicitly emphasizes risk analysis in every iteration?', options: ['Waterfall', 'Spiral', 'Incremental', 'Big Bang'], answer: 'Spiral' },
+  { subject: 'Software Engineering', question: 'What is backlog refinement (grooming)?', options: ['Deploying the product', 'Cleaning the code base', 'Reviewing and updating product backlog items', 'Writing test scripts'], answer: 'Reviewing and updating product backlog items' },
+  { subject: 'Software Engineering', question: 'Acceptance criteria in a user story describe ______.', options: ['UI color scheme', 'Technical design', 'Conditions that must be met for the story to be complete', 'Deployment steps'], answer: 'Conditions that must be met for the story to be complete' },
+  { subject: 'Software Engineering', question: 'Which maintenance activity adapts software to changes in the environment?', options: ['Corrective', 'Adaptive', 'Perfective', 'Preventive'], answer: 'Adaptive' },
+  { subject: 'Software Engineering', question: 'What is the main objective of DevOps practices?', options: ['Separate development and operations', 'Enable continuous integration and delivery', 'Eliminate automation', 'Focus solely on testing'], answer: 'Enable continuous integration and delivery' },
+  { subject: 'Software Engineering', question: 'Which document provides detailed design of modules and data structures?', options: ['Project charter', 'Low-level design document', 'Vision statement', 'Release notes'], answer: 'Low-level design document' },
+  { subject: 'Software Engineering', question: 'Which metric measures productivity as lines of code delivered per person-month?', options: ['Defect density', 'Velocity', 'LOC productivity', 'Cyclomatic complexity'], answer: 'LOC productivity' },
 
   // Machine Learning Questions (25 questions)
   { subject: 'Machine Learning', question: 'What is Machine Learning?', options: ['A subset of AI', 'A programming language', 'A database', 'An operating system'], answer: 'A subset of AI' },
@@ -239,6 +378,22 @@ const quizQuestions = [
   { subject: 'Machine Learning', question: 'Which is not a hyperparameter?', options: ['Learning rate', 'Number of epochs', 'Weights', 'Batch size'], answer: 'Weights' },
   { subject: 'Machine Learning', question: 'What is transfer learning?', options: ['Using pre-trained models for new tasks', 'Transferring data', 'Moving models', 'None'], answer: 'Using pre-trained models for new tasks' },
   { subject: 'Machine Learning', question: 'Which library is commonly used for ML in Python?', options: ['NumPy', 'Pandas', 'Scikit-learn', 'All of the above'], answer: 'All of the above' },
+  // Additional Machine Learning questions to reach 40
+  { subject: 'Machine Learning', question: 'Which algorithm is commonly used for linear regression problems?', options: ['KNN', 'Linear Regression', 'Naive Bayes', 'K-Means'], answer: 'Linear Regression' },
+  { subject: 'Machine Learning', question: 'What does a confusion matrix summarize?', options: ['Feature correlations', 'Model hyperparameters', 'True vs predicted classifications', 'Gradient updates'], answer: 'True vs predicted classifications' },
+  { subject: 'Machine Learning', question: 'Which metric balances precision and recall?', options: ['Accuracy', 'F1-score', 'MSE', 'R-squared'], answer: 'F1-score' },
+  { subject: 'Machine Learning', question: 'What is the purpose of the learning rate in gradient descent?', options: ['Controls size of parameter updates', 'Stops overfitting automatically', 'Chooses number of layers', 'Sets batch size'], answer: 'Controls size of parameter updates' },
+  { subject: 'Machine Learning', question: 'Which regularization technique randomly drops units during training?', options: ['Batch normalization', 'Dropout', 'Early stopping', 'L1 regularization'], answer: 'Dropout' },
+  { subject: 'Machine Learning', question: 'Bagging (Bootstrap Aggregating) primarily helps to ______.', options: ['Increase bias', 'Reduce variance', 'Reduce dataset size', 'Increase dimensionality'], answer: 'Reduce variance' },
+  { subject: 'Machine Learning', question: 'Which clustering algorithm can find arbitrarily shaped clusters and handle noise?', options: ['K-Means', 'DBSCAN', 'Hierarchical agglomerative', 'Expectation Maximization'], answer: 'DBSCAN' },
+  { subject: 'Machine Learning', question: 'A validation set is used to ______.', options: ['Train the final model', 'Tune hyperparameters and prevent overfitting', 'Test model after deployment', 'Store raw data'], answer: 'Tune hyperparameters and prevent overfitting' },
+  { subject: 'Machine Learning', question: 'The bias-variance trade-off illustrates ______.', options: ['Conflict between training time and accuracy', 'Balance between underfitting and overfitting', 'Difference between train and test size', 'Choice of optimizer'], answer: 'Balance between underfitting and overfitting' },
+  { subject: 'Machine Learning', question: 'Which preprocessing technique scales features to zero mean and unit variance?', options: ['Min-Max scaling', 'Standardization', 'One-hot encoding', 'Binarization'], answer: 'Standardization' },
+  { subject: 'Machine Learning', question: 'Decision trees commonly use which measure to choose splits?', options: ['Mean squared error', 'Information gain or Gini impurity', 'Euclidean distance', 'Cosine similarity'], answer: 'Information gain or Gini impurity' },
+  { subject: 'Machine Learning', question: 'Logistic regression is primarily used for ______.', options: ['Clustering', 'Regression on continuous values', 'Binary classification', 'Dimensionality reduction'], answer: 'Binary classification' },
+  { subject: 'Machine Learning', question: 'In neural networks, what does the term epoch represent?', options: ['One complete pass through the entire training dataset', 'One batch update', 'Number of hidden layers', 'Size of validation set'], answer: 'One complete pass through the entire training dataset' },
+  { subject: 'Machine Learning', question: 'Which metric measures the area under the Receiver Operating Characteristic curve?', options: ['MSE', 'AUC', 'RMSE', 'R²'], answer: 'AUC' },
+  { subject: 'Machine Learning', question: 'Early stopping is a regularization technique that ______.', options: ['Adds penalty to weights', 'Stops training when validation performance no longer improves', 'Reduces dataset size', 'Creates synthetic samples'], answer: 'Stops training when validation performance no longer improves' },
 
   // Placement Prep Questions (25 questions)
   { subject: 'Placement Prep', question: 'What is the time complexity of binary search?', options: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'], answer: 'O(log n)' },
@@ -265,8 +420,41 @@ const quizQuestions = [
   { subject: 'Placement Prep', question: 'Which design pattern ensures only one instance of a class?', options: ['Factory', 'Singleton', 'Observer', 'Strategy'], answer: 'Singleton' },
   { subject: 'Placement Prep', question: 'What is the purpose of unit testing?', options: ['Test individual components', 'Test entire system', 'Test user interface', 'Test database'], answer: 'Test individual components' },
   { subject: 'Placement Prep', question: 'Which is not an OOP principle?', options: ['Encapsulation', 'Inheritance', 'Polymorphism', 'Compilation'], answer: 'Compilation' },
-  { subject: 'Placement Prep', question: 'What does MVC stand for?', options: ['Model View Controller', 'Multiple View Controller', 'Model Virtual Controller', 'None'], answer: 'Model View Controller' }
+  { subject: 'Placement Prep', question: 'What does MVC stand for?', options: ['Model View Controller', 'Multiple View Controller', 'Model Virtual Controller', 'None'], answer: 'Model View Controller' },
+  // Additional Placement Prep questions to reach 40
+  { subject: 'Placement Prep', question: 'Which sorting algorithm is stable and efficient for nearly sorted data?', options: ['Selection Sort', 'Insertion Sort', 'Heap Sort', 'Quick Sort'], answer: 'Insertion Sort' },
+  { subject: 'Placement Prep', question: 'Which data structure removes elements based on priority values rather than insertion order?', options: ['Queue', 'Priority Queue', 'Stack', 'Deque'], answer: 'Priority Queue' },
+  { subject: 'Placement Prep', question: 'What is the average-case time complexity of inserting into a balanced binary search tree?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], answer: 'O(log n)' },
+  { subject: 'Placement Prep', question: 'Which HTTP method requests that a resource be deleted on the server?', options: ['GET', 'POST', 'DELETE', 'PATCH'], answer: 'DELETE' },
+  { subject: 'Placement Prep', question: 'Which SQL clause is used to sort query results?', options: ['GROUP BY', 'ORDER BY', 'HAVING', 'WHERE'], answer: 'ORDER BY' },
+  { subject: 'Placement Prep', question: 'Which design pattern lets you choose an algorithm implementation at runtime?', options: ['Singleton', 'Strategy', 'Decorator', 'Observer'], answer: 'Strategy' },
+  { subject: 'Placement Prep', question: 'Which bitwise operator toggles bits and is often used for tricks like swapping values?', options: ['&', '|', '^', '~'], answer: '^' },
+  { subject: 'Placement Prep', question: 'Dynamic programming solves problems by ______.', options: ['Using recursion without memoization', 'Breaking them into overlapping subproblems and reusing results', 'Randomly guessing answers', 'Sorting inputs first'], answer: 'Breaking them into overlapping subproblems and reusing results' },
+  { subject: 'Placement Prep', question: 'Which SQL keyword removes duplicate rows from a result set?', options: ['UNIQUE', 'DISTINCT', 'PRIMARY', 'DELETE'], answer: 'DISTINCT' },
+  { subject: 'Placement Prep', question: 'Which protocol underpins most REST APIs on the web?', options: ['SMTP', 'FTP', 'HTTP', 'IMAP'], answer: 'HTTP' },
+  { subject: 'Placement Prep', question: 'Which data structure underlies the call stack used for recursion?', options: ['Queue', 'Stack', 'Heap', 'Graph'], answer: 'Stack' },
+  { subject: 'Placement Prep', question: 'Big-O notation describes ______.', options: ['Average input size', 'Upper bound of algorithm growth rate', 'Hardware speed', 'Memory addresses'], answer: 'Upper bound of algorithm growth rate' },
+  { subject: 'Placement Prep', question: 'Which Git command uploads local commits to a remote repository?', options: ['git pull', 'git push', 'git clone', 'git fetch'], answer: 'git push' },
+  { subject: 'Placement Prep', question: 'Which resume section should highlight quantifiable achievements for recruiters?', options: ['Contact information', 'Work experience', 'Hobbies', 'References'], answer: 'Work experience' },
+  { subject: 'Placement Prep', question: 'Behavioral interview answers are often structured using which framework?', options: ['CRUD', 'STAR (Situation, Task, Action, Result)', 'MVC', 'REST'], answer: 'STAR (Situation, Task, Action, Result)' }
 ];
+
+const examSubjects = ['Java', 'Python', 'DSA', 'DBMS', 'Operating Systems', 'Computer Networks', 'Web Development', 'Software Engineering', 'Machine Learning', 'Placement Prep'];
+
+const subjectCounts = examSubjects.reduce((acc, subject) => {
+  acc[subject] = quizQuestions.filter((q) => q.subject === subject).length;
+  return acc;
+}, {});
+
+const insufficientSubjects = Object.entries(subjectCounts).filter(([, count]) => count < 40);
+
+if (insufficientSubjects.length) {
+  console.error('Each exam subject requires at least 40 questions.');
+  insufficientSubjects.forEach(([subject, count]) => {
+    console.error(`${subject}: currently ${count} questions`);
+  });
+  process.exit(1);
+}
 
 const seedQuizzes = async () => {
   try {
@@ -278,6 +466,7 @@ const seedQuizzes = async () => {
     console.log('Cleared existing quiz data');
 
     // Insert new quiz questions
+    console.log('Question counts per subject:', subjectCounts);
     await Quiz.insertMany(quizQuestions);
     console.log(`Inserted ${quizQuestions.length} quiz questions`);
 

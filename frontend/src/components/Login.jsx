@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios'; // Axios instance
 
 const Login = () => {
@@ -8,8 +8,17 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // If user is already logged in, redirect them
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
  const handleLogin = async (e) => {
   e.preventDefault();
+  setError('');
 
   try {
     const res = await api.post('/auth/login', {
@@ -19,7 +28,7 @@ const Login = () => {
 
     const { token, user } = res.data;
 
-
+    // Store token and user data
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
 
@@ -29,7 +38,7 @@ const Login = () => {
     navigate('/dashboard');
   } catch (err) {
     console.error('Login error:', err);
-    alert(err.response?.data?.message || 'Server error during login');
+    setError(err.response?.data?.message || 'Server error during login');
   }
 };
 
@@ -63,9 +72,16 @@ const Login = () => {
           </div>
           <button type="submit" className="btn btn-primary w-100">Login</button>
         </form>
-        <p className="text-center mt-3">
-          Don't have an account? <a href="/register">Register</a>
-        </p>
+        <div className="text-center mt-3">
+          <p className="mb-2">
+            <Link to="/forgot-password" style={{ textDecoration: 'none', color: '#6366f1' }}>
+              Forgot Password?
+            </Link>
+          </p>
+          <p className="mb-0">
+            Don't have an account? <Link to="/register">Register</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const features = [
@@ -26,11 +26,15 @@ const features = [
 ];
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem('token');
   const subjectNames = [
     'Java', 'Python', 'DSA', 'Operating Systems', 'DBMS', 'Computer Networks',
     'Web Dev', 'AI/ML', 'Software Engineering', 'Aptitude'
   ];
+
+  // Landing page is public - if user is logged in, they can still access it
+  // No redirects needed
 
   return (
     <div style={{ background: 'linear-gradient(180deg,#ffffff 0%, #f8fafc 100%)' }}>

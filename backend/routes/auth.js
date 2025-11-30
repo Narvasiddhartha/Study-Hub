@@ -5,7 +5,32 @@ import cloudinary from '../config/cloudinary.js';
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/authMiddleware.js';
+import crypto from 'crypto';
 const router = express.Router();
+
+const DEFAULT_FOCUS_SCHEDULE = [
+  {
+    title: 'OS scheduling drills',
+    accent: '#38bdf8',
+    order: 0,
+    startTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 45 * 60 * 1000)
+  },
+  {
+    title: 'Mock interview (DSA)',
+    accent: '#fbbf24',
+    order: 1,
+    startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000)
+  },
+  {
+    title: 'Revise SQL joins',
+    accent: '#34d399',
+    order: 2,
+    startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000)
+  }
+];
 
 const storage = multer.diskStorage({});
 const upload = multer({ storage });
@@ -181,11 +206,69 @@ router.get('/streak', auth, async (req, res) => {
       currentStreak: user.currentStreak,
       longestStreak: user.longestStreak,
       lastQuizDate: user.lastQuizDate,
-      streakHistory: sortedHistory
+      streakHistory: sortedHistory,
+      quizCount: user.quizHistory.length,
+      examCount: user.examHistory.length
     });
   } catch (err) {
     console.error('Error fetching streak info:', err);
     res.status(500).json({ error: 'Failed to fetch streak information', details: err.message });
+  }
+});
+
+router.get('/focus-schedule', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.focusSchedule || user.focusSchedule.length === 0) {
+      user.focusSchedule = DEFAULT_FOCUS_SCHEDULE;
+      await user.save();
+    }
+
+    res.json({ focusSchedule: user.focusSchedule });
+  } catch (error) {
+    console.error('Error fetching focus schedule:', error);
+    res.status(500).json({ error: 'Failed to fetch focus schedule' });
+  }
+});
+
+router.put('/focus-schedule', auth, async (req, res) => {
+  try {
+    const { focusSchedule } = req.body;
+    if (!Array.isArray(focusSchedule)) {
+      return res.status(400).json({ message: 'focusSchedule must be an array' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const sanitized = focusSchedule.map((session, index) => {
+      const start = session.startTime ? new Date(session.startTime) : null;
+      const end = session.endTime ? new Date(session.endTime) : null;
+      return {
+        title: (session.title || `Session ${index + 1}`).toString().slice(0, 80),
+        accent:
+          typeof session.accent === 'string' && session.accent.trim()
+            ? session.accent.trim()
+            : DEFAULT_FOCUS_SCHEDULE[index % DEFAULT_FOCUS_SCHEDULE.length].accent,
+        order: Number.isFinite(Number(session.order)) ? Number(session.order) : index,
+        startTime: start && !isNaN(start) ? start : null,
+        endTime: end && !isNaN(end) ? end : null
+      };
+    });
+
+    user.focusSchedule = sanitized;
+    await user.save();
+
+    res.json({ focusSchedule: user.focusSchedule });
+  } catch (error) {
+    console.error('Error updating focus schedule:', error);
+    res.status(500).json({ error: 'Failed to update focus schedule' });
   }
 });
 
@@ -194,5 +277,93 @@ export async function getUserQuizHistory(userId) {
   const user = await User.findById(userId).select('quizHistory');
   return user ? user.quizHistory : [];
 }
+
+// Forgot Password - Generate reset token
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    
+    // Always return success message for security (don't reveal if email exists)
+    if (!user) {
+      return res.status(200).json({ 
+        message: 'If that email exists, a password reset link has been sent.' 
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    // Set token and expiration (1 hour from now)
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    
+    // In development, log the reset URL
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Password reset URL:', resetUrl);
+    }
+
+    res.status(200).json({ 
+      message: 'If that email exists, a password reset link has been sent.',
+      // Only include token in development
+      ...(process.env.NODE_ENV !== 'production' && { resetToken, resetUrl })
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset Password - Verify token and update password
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: 'Password is required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+  }
+
+  try {
+    // Hash the token to compare with stored hash
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    // Find user with valid token that hasn't expired
+    const user = await User.findOne({
+      resetPasswordToken: resetTokenHash,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Update password and clear reset token
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+  } catch (err) {
+    console.error('Reset password error:', err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;
